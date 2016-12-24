@@ -1,0 +1,38 @@
+Configuring simple-0.11.1...
+Building simple-0.11.1...
+Preprocessing library simple-0.11.1...
+[ 1 of 10] Compiling Web.Simple.Responses ( src/Web/Simple/Responses.hs, .stack-work/dist/x86_64-linux/Cabal-1.24.0.0/build/Web/Simple/Responses.o )
+[ 2 of 10] Compiling Web.Simple.Controller.Trans ( src/Web/Simple/Controller/Trans.hs, .stack-work/dist/x86_64-linux/Cabal-1.24.0.0/build/Web/Simple/Controller/Trans.o )
+[ 3 of 10] Compiling Web.Simple.Controller ( src/Web/Simple/Controller.hs, .stack-work/dist/x86_64-linux/Cabal-1.24.0.0/build/Web/Simple/Controller.o )
+
+src/Web/Simple/Controller.hs:55:1: warning: [-Wunused-imports]
+    The import of ‘Data.Monoid’ is redundant
+      except perhaps to import instances from ‘Data.Monoid’
+    To import instances alone, use: import Data.Monoid()
+[ 4 of 10] Compiling Web.Simple.Controller.Exception ( src/Web/Simple/Controller/Exception.hs, .stack-work/dist/x86_64-linux/Cabal-1.24.0.0/build/Web/Simple/Controller/Exception.o )
+[ 5 of 10] Compiling Web.Simple.Static ( src/Web/Simple/Static.hs, .stack-work/dist/x86_64-linux/Cabal-1.24.0.0/build/Web/Simple/Static.o )
+[ 6 of 10] Compiling Web.Simple.Auth  ( src/Web/Simple/Auth.hs, .stack-work/dist/x86_64-linux/Cabal-1.24.0.0/build/Web/Simple/Auth.o )
+[ 7 of 10] Compiling Web.Frank        ( src/Web/Frank.hs, .stack-work/dist/x86_64-linux/Cabal-1.24.0.0/build/Web/Frank.o )
+[ 8 of 10] Compiling Web.Simple.Templates ( src/Web/Simple/Templates.hs, .stack-work/dist/x86_64-linux/Cabal-1.24.0.0/build/Web/Simple/Templates.o )
+
+src/Web/Simple/Templates.hs:94:1: warning: [-Wredundant-constraints]
+    • Redundant constraint: Monad m
+    • In the type signature for:
+           render :: (HasTemplates m hs, Monad m, ToJSON a) =>
+                     FilePath -> a -> ControllerT hs m ()
+[ 9 of 10] Compiling Web.REST         ( src/Web/REST.hs, .stack-work/dist/x86_64-linux/Cabal-1.24.0.0/build/Web/REST.o )
+[10 of 10] Compiling Web.Simple       ( src/Web/Simple.hs, .stack-work/dist/x86_64-linux/Cabal-1.24.0.0/build/Web/Simple.o )
+Preprocessing executable 'smpl' for simple-0.11.1...
+[1 of 2] Compiling Paths_simple     ( .stack-work/dist/x86_64-linux/Cabal-1.24.0.0/build/autogen/Paths_simple.hs, .stack-work/dist/x86_64-linux/Cabal-1.24.0.0/build/smpl/smpl-tmp/Paths_simple.o )
+[2 of 2] Compiling Main             ( src/smpl.hs, .stack-work/dist/x86_64-linux/Cabal-1.24.0.0/build/smpl/smpl-tmp/Main.o )
+
+src/smpl.hs:7:1: warning: [-Wunused-imports]
+    The import of ‘Control.Applicative’ is redundant
+      except perhaps to import instances from ‘Control.Applicative’
+    To import instances alone, use: import Control.Applicative()
+Linking .stack-work/dist/x86_64-linux/Cabal-1.24.0.0/build/smpl/smpl ...
+Installing library in
+/home/inn1t-f00s/.stack/snapshots/x86_64-linux/lts-7.14/8.0.1/lib/x86_64-linux-ghc-8.0.1/simple-0.11.1-8o2BQFzK1Z89W22IxAMTlQ
+Installing executable(s) in
+/home/inn1t-f00s/.stack/snapshots/x86_64-linux/lts-7.14/8.0.1/bin
+Registering simple-0.11.1...
