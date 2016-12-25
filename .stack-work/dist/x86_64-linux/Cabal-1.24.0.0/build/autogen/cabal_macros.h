@@ -14,6 +14,20 @@
   (major1) == 4 && (major2) <  9 || \
   (major1) == 4 && (major2) == 9 && (minor) <= 0)
 
+/* package containers-0.5.7.1 */
+#define VERSION_containers "0.5.7.1"
+#define MIN_VERSION_containers(major1,major2,minor) (\
+  (major1) <  0 || \
+  (major1) == 0 && (major2) <  5 || \
+  (major1) == 0 && (major2) == 5 && (minor) <= 7)
+
+/* package mtl-2.2.1 */
+#define VERSION_mtl "2.2.1"
+#define MIN_VERSION_mtl(major1,major2,minor) (\
+  (major1) <  2 || \
+  (major1) == 2 && (major2) <  2 || \
+  (major1) == 2 && (major2) == 2 && (minor) <= 1)
+
 /* package simple-0.11.1 */
 #define VERSION_simple "0.11.1"
 #define MIN_VERSION_simple(major1,major2,minor) (\
@@ -98,7 +112,7 @@
   (major1) == 2 && (major2) <  24 || \
   (major1) == 2 && (major2) == 24 && (minor) <= 0)
 
-#define CURRENT_COMPONENT_ID "interpreter-0.1.0.0-46wKNnLIDOxFhs8ye3Dr3N"
+#define CURRENT_COMPONENT_ID "interpreter-0.1.0.0-GqnoMtv2RfEKuRoO5Q8gRz"
 
-#define CURRENT_PACKAGE_KEY "interpreter-0.1.0.0-46wKNnLIDOxFhs8ye3Dr3N"
+#define CURRENT_PACKAGE_KEY "interpreter-0.1.0.0-GqnoMtv2RfEKuRoO5Q8gRz"
 

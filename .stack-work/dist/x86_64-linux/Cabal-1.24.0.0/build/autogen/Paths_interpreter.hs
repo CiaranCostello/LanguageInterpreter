@@ -30,7 +30,7 @@ version = Version [0,1,0,0] []
 bindir, libdir, datadir, libexecdir, sysconfdir :: FilePath
 
 bindir     = "/home/inn1t-f00s/Documents/fourth-year/haskell/interpreter/.stack-work/install/x86_64-linux/lts-7.14/8.0.1/bin"
-libdir     = "/home/inn1t-f00s/Documents/fourth-year/haskell/interpreter/.stack-work/install/x86_64-linux/lts-7.14/8.0.1/lib/x86_64-linux-ghc-8.0.1/interpreter-0.1.0.0-46wKNnLIDOxFhs8ye3Dr3N"
+libdir     = "/home/inn1t-f00s/Documents/fourth-year/haskell/interpreter/.stack-work/install/x86_64-linux/lts-7.14/8.0.1/lib/x86_64-linux-ghc-8.0.1/interpreter-0.1.0.0-GqnoMtv2RfEKuRoO5Q8gRz"
 datadir    = "/home/inn1t-f00s/Documents/fourth-year/haskell/interpreter/.stack-work/install/x86_64-linux/lts-7.14/8.0.1/share/x86_64-linux-ghc-8.0.1/interpreter-0.1.0.0"
 libexecdir = "/home/inn1t-f00s/Documents/fourth-year/haskell/interpreter/.stack-work/install/x86_64-linux/lts-7.14/8.0.1/libexec"
 sysconfdir = "/home/inn1t-f00s/Documents/fourth-year/haskell/interpreter/.stack-work/install/x86_64-linux/lts-7.14/8.0.1/etc"
