@@ -2,7 +2,7 @@
 
  {-# Language MultiParamTypeClasses, TypeSynonymInstances, FlexibleInstances #-} 
 
- module InterpreterBase (eval, Expr) where
+ module InterpreterBase where
 
 -- I want my own definition of lookup and I want to write my own function
 -- named "print".
@@ -29,14 +29,14 @@
 -- {-------------------------------------------------------------------}
 
  data Val = I Int | B Bool
-            deriving (Eq, Show)
+            deriving (Eq, Show, Read)
 
  data Expr = Const Val
       | Add Expr Expr | Sub Expr Expr  | Mul Expr Expr | Div Expr Expr
       | And Expr Expr | Or Expr Expr | Not Expr 
       | Eq Expr Expr | Gt Expr Expr | Lt Expr Expr
       | Var String
-    deriving (Eq, Show)
+    deriving (Eq, Show, Read)
 
  type Name = String 
  type Env = Map.Map Name Val
@@ -112,36 +112,45 @@
                 | Seq Statement Statement
                 | Try Statement Statement
                 | Pass                    
-       deriving (Eq, Show)
+       deriving (Eq, Show, Read)
+
+-- make Statement an instance of monad
+ instance Monoid Statement where
+  mempty = Pass
+  mappend a b = a `Seq` b
 
 
 -- {-- Monadic style statement evaluator, 
 --  -- with error handling and Reader monad instance to carry dictionary
 --  --}
+  
+ -- allows a list of executed statements to be passed around. This should be useful for rewinding 
+ type BigEnv = ([Statement], Env)
 
- type Run a = StateT Env (ExceptT String IO) a
- runRun p = runExceptT ( runStateT p Map.empty)
+
+ type Run a = StateT BigEnv (ExceptT String IO) a
+ runRun p = runExceptT ( runStateT p ([], Map.empty))
 
  set :: (Name, Val) -> Run ()
- set (s, i) = state $ (\table -> ((), Map.insert s i table))
+ set (s, i) = state $ (\(list, table) -> ((), (list, Map.insert s i table)))
 
  exec :: Statement -> Run ()
- exec (Assign s v) = do st <- get
+ exec (Assign s v) = do (_, st) <- get
                         Right val <- return $ runEval st (eval v)
                         set (s, val)
 
- exec (Seq s0 s1) = do exec s0 >> exec s1
+ exec (Seq s0 s1) = do execCheck s0 >> execCheck s1
 
- exec (Print e) = do  st <- get
-                      Right val <- return $ st (eval e)
+ exec (Print e) = do  (_, st) <- get
+                      Right val <- return $ runEval st (eval e)
                       liftIO $ System.print val
                       return ()
 
- exec (If cond s0 s1) = do  st <- get
+ exec (If cond s0 s1) = do  (_, st) <- get
                             Right (B val) <- return $ runEval st (eval cond)
                             if val then do exec s0 else do exec s1
 
- exec (While cond s) = do st <- get
+ exec (While cond s) = do (_, st) <- get
                           Right (B val) <- return $ runEval st (eval cond)
                           if val then do exec s >> exec (While cond s) else return ()
 
@@ -154,13 +163,32 @@
  bool = Const . B
  var = Var
 
+ 
+-- logic for asking the user whether or not to execute a section of code
+ execCheck :: Statement -> Run ()
+ execCheck s = do liftIO $ System.print $ "Execute '"++(show s)++"'? Type y if so."
+                  answer <- liftIO $ getLine
+                  case answer of
+                    "y" -> exec s
+                    "i" -> runInspect s
+                    otherwise -> throwError "User decided to abort."
+
+ runInspect :: Statement -> Run ()
+ runInspect s = do
+    (_, st) <- get
+    liftIO $ printEnvironment st
+    execCheck s
+
+ printEnvironment :: Env -> IO ()
+ printEnvironment = putStrLn . show
+
  class SmartAssignment a where
   assign :: String -> a -> Statement
 
  instance SmartAssignment Int where
   assign v i = Assign v (Const (I i))
 
- instance Smart Assignment Bool where
+ instance SmartAssignment Bool where
   assign v b = Assign v (Const (B b))
 
  instance SmartAssignment Expr where
@@ -180,46 +208,18 @@
   x .* y = (Var x) `Mul` (Const (I y))
   x .- y = (Var x) `Sub` (Const (I y))
 
- type Program = Writer Statement ()
-
- instance Monoid Statement where
-  mempty = Pass
-  mappend a b = a `Seq` b
-
-
- compile :: Program -> Statement
- compile p = snd . runIdentity $ runWriterT print
-
- run :: Program -> IO ()
- run program -> do result <- runExceptT $ (runStateT $ exec $ snd $ runIdentity $ (runWriterT program)) Map.empty
+ run :: Statement -> IO ()
+ run program = do result <- runExceptT $ (runStateT $ exec program) ([], Map.empty)
                   case result of
-                    Right ( (), env) -> return ()
+                    Right ((), env) -> return ()
                     Left exn -> System.print ("Uncaught exception: "++exn)
 
- infixl 1 .=
-  (.=) :: String -> Expr -> Program
-  var .= val = tell $ assign var val
+ runX :: [Statement] -> IO ()
+ runX s = run2 (s, []) ([], Map.empty)
 
-  iif :: Expr -> Program -> Program -> Program
-  iif cond tthen eelse = tell $ If cond (compile tthen) (compile eelse)
-
-  while :: Expr -> Program -> Program
-  while cond body = tell $ While cond (compile body)
-
-  print :: Expr Program
-  print e = tell $ Print e
-
-  try :: Program -> Program -> Program
-  try bolck recover = tell $ Try (compile block) (compile recover)
-
-  prog10 :: Program
-  prog10 = do
-           "arg"     .= int 10
-           "scratch" .= var "arg"
-           "total"   .= int 1
-           while ( (var "scratch") `Gt` (int 1) ) (
-            do "total"   .=  "total" .* "scratch"
-               "scratch" .= "scratch" .- (1::Int)
-               print $ var "scratch" 
-            )
-           print $ var "total"
+ run2 :: ([Statement], [Statement]) -> BigEnv -> IO ()
+ run2 ([], done) env = return ()
+ run2 ((stmt:todo), done) env = do  result <- runExceptT $ (runStateT $ exec stmt) env
+                                    case result of
+                                      Right ((), nEnv) -> run2 (todo, (stmt:done)) nEnv
+                                      Left exn -> System.print ("Uncaught exception: "++exn)

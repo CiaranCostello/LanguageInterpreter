@@ -1,0 +1,2 @@
+Assign "lol" (Const (I 1))
+Print (Var "lol")
