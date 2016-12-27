@@ -1,2 +1,3 @@
 Assign "lol" (Const (I 1))
+Assign "lol" (Const (I 2))
 Print (Var "lol")

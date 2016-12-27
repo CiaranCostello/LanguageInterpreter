@@ -39,10 +39,10 @@
     deriving (Eq, Show, Read)
 
  type Name = String 
- type Env = Map.Map Name Val
+ type Env = Map.Map Name [Val]
 
  lookup k t = case Map.lookup k t of
-                Just x -> return x
+                Just (x:_) -> return x
                 Nothing -> fail ("Unknown variable "++k)
 
 -- {-- Monadic style expression evaluator, 
@@ -132,7 +132,9 @@
  runRun p = runExceptT ( runStateT p ([], Map.empty))
 
  set :: (Name, Val) -> Run ()
- set (s, i) = state $ (\(list, table) -> ((), (list, Map.insert s i table)))
+ set (s, i) = do
+    (done, st) <- get
+    put (done, (Map.insertWith (++) s [i] st))
 
  exec :: Statement -> Run ()
  exec (Assign s v) = do (_, st) <- get
@@ -213,7 +215,7 @@
                   case result of
                     Right ((), env) -> return ()
                     Left exn -> System.print ("Uncaught exception: "++exn)
-
+{-
  runX :: [Statement] -> IO ()
  runX s = run2 (s, []) ([], Map.empty)
 
@@ -223,3 +225,4 @@
                                     case result of
                                       Right ((), nEnv) -> run2 (todo, (stmt:done)) nEnv
                                       Left exn -> System.print ("Uncaught exception: "++exn)
+                                      -}
