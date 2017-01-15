@@ -7,7 +7,7 @@
 -- I want my own definition of lookup and I want to write my own function
 -- named "print".
 
- import Prelude hiding (lookup, print)
+ import Prelude hiding (lookup, print, reverse)
 
  import qualified Data.Map as Map
  import Data.Maybe
@@ -141,22 +141,25 @@
                         Right val <- return $ runEval st (eval v)
                         set (s, val)
 
- exec (Seq s0 s1) = do execCheck s0 >> execCheck s1
+ exec (Seq s0 s1) = do execCheck s0 >> exec s1
 
  exec (Print e) = do  (_, st) <- get
                       Right val <- return $ runEval st (eval e)
                       liftIO $ System.print val
                       return ()
 
+-- to allow reversing an if statement we need to have a history of what branch it took. execCheck allows this
  exec (If cond s0 s1) = do  (_, st) <- get
                             Right (B val) <- return $ runEval st (eval cond)
-                            if val then do exec s0 else do exec s1
+                            if val then do execCheck s0 else do execCheck s1
 
+-- to allow history we make an execution of a loop is to a sequntial opperation of the loop and then the while statement again
  exec (While cond s) = do (_, st) <- get
                           Right (B val) <- return $ runEval st (eval cond)
-                          if val then do exec s >> exec (While cond s) else return ()
+                          if val then do exec (Seq s (While cond s)) else return ()
 
- exec (Try s0 s1) = do catchError (exec s0) (\e -> exec s1)
+-- like with if we need a history of what branch was taken, so execCheck used
+ exec (Try s0 s1) = do catchError (execCheck s0) (\e -> execCheck s1)
 
  exec Pass = return ()
 
@@ -171,15 +174,50 @@
  execCheck s = do liftIO $ System.print $ "Execute '"++(show s)++"'? Type y if so."
                   answer <- liftIO $ getLine
                   case answer of
-                    "y" -> exec s
+                    "y" -> record s >> exec s
                     "i" -> runInspect s
+                    "h" -> inspectHistory s
+                    "b" -> rewind s
                     otherwise -> throwError "User decided to abort."
 
+-- print the environment history and then return to waiting for user input
  runInspect :: Statement -> Run ()
  runInspect s = do
     (_, st) <- get
     liftIO $ printEnvironment st
     execCheck s
+
+-- record the statement in the list of statements in the state
+ record :: Statement -> Run ()
+ record s = do
+    (h, st) <- get
+    put (s:h, st)
+
+-- print the statement history and then return to waiting for user input
+ inspectHistory :: Statement -> Run ()
+ inspectHistory s = do
+    (h, _) <- get
+    liftIO $ System.print h
+    execCheck s
+
+ -- rewind the execution of a statement
+ -- involves reversing assignment if it is assignment
+ -- also pop a statement off the history
+ rewind :: Statement -> Run ()
+ rewind s = do
+    ((x:xs), _) <- get
+    reverse x 
+    (_, st) <- get
+    put (xs, st)
+    execCheck x >> execCheck s
+
+-- reverse a statement, only cares if the statement was an assignment
+ reverse :: Statement -> Run ()
+ reverse (Assign s i) = do
+    (h, st) <- get
+    put (h, (Map.insertWith (\_ x -> (tail x)) s [(I 999)] st))
+ reverse _ = return ()
+
 
  printEnvironment :: Env -> IO ()
  printEnvironment = putStrLn . show
