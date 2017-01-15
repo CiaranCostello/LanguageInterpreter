@@ -15,7 +15,7 @@
 Completed.
 
 ### Part 2
-*Provide a monadic interpreter for the language that allows us to step through a program. Your program must read a source file and execute the program contained in it line by line. You can use automatically derived read instances to do the parsing, and no special error messages are needed if a parse fails. Running the program should execute the first statement, and then prompt the user to run the next statement. *
+*Provide a monadic interpreter for the language that allows us to step through a program. Your program must read a source file and execute the program contained in it line by line. You can use automatically derived read instances to do the parsing, and no special error messages are needed if a parse fails. Running the program should execute the first statement, and then prompt the user to run the next statement.*
 
 Provides an option to execute the next statement before each statement (apart from the first statement, not including seq). Entering **y** moves the interpreter on to the next statement.
 Completed.
