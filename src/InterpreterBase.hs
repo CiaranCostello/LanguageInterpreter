@@ -151,15 +151,18 @@
 -- to allow reversing an if statement we need to have a history of what branch it took. execCheck allows this
  exec (If cond s0 s1) = do  (_, st) <- get
                             Right (B val) <- return $ runEval st (eval cond)
+                            popHis
                             if val then do execCheck s0 else do execCheck s1
 
 -- to allow history we make an execution of a loop is to a sequntial opperation of the loop and then the while statement again
  exec (While cond s) = do (_, st) <- get
                           Right (B val) <- return $ runEval st (eval cond)
+                          popHis
                           if val then do exec (Seq s (While cond s)) else return ()
 
 -- like with if we need a history of what branch was taken, so execCheck used
- exec (Try s0 s1) = do catchError (execCheck s0) (\e -> execCheck s1)
+ exec (Try s0 s1) = do popHis
+                       catchError (execCheck s0) (\e -> execCheck s1)
 
  exec Pass = return ()
 
@@ -186,12 +189,20 @@
     (_, st) <- get
     liftIO $ printEnvironment st
     execCheck s
+ 
+ printEnvironment :: Env -> IO ()
+ printEnvironment = putStrLn . show
 
 -- record the statement in the list of statements in the state
  record :: Statement -> Run ()
  record s = do
     (h, st) <- get
     put (s:h, st)
+
+ popHis :: Run ()
+ popHis = do 
+    ((h:hs), st) <- get
+    put (hs, st)
 
 -- print the statement history and then return to waiting for user input
  inspectHistory :: Statement -> Run ()
@@ -217,10 +228,6 @@
     (h, st) <- get
     put (h, (Map.insertWith (\_ x -> (tail x)) s [(I 999)] st))
  reverse _ = return ()
-
-
- printEnvironment :: Env -> IO ()
- printEnvironment = putStrLn . show
 
  class SmartAssignment a where
   assign :: String -> a -> Statement
